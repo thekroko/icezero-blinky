@@ -18,7 +18,7 @@ To install the programming software:
 To flash this sketch:
 
 ```
-icezprog icezero.bin 
+icezprog blinky.bin 
 ```
 
 The output should look similar to this:
@@ -34,10 +34,10 @@ DONE.
 
 ## How to change this sketch
 
-To change this sketch, edit icezero.v, and then call:
+To change this sketch, edit blinky.v, and then call:
 
 ```
-make prog
+make blinky.prog
 ```
 
 This will synthesize and flash the sketch. It might take a minute or two.

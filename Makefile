@@ -1,31 +1,27 @@
+PROJ = blinky
+PIN_DEF = icezero.pcf
 
-all: icezero.bin
+DEVICE = hx8k
+PACKAGE = tq144:4k
 
-prog: icezero.bin
-	icezprog icezero.bin
+all: $(PROJ).bin
 
-reset: icezprog
-	icezprog .
+%.blif: %.v
+	yosys -p 'synth_ice40 -top top -blif $@' $<
 
-icezero.blif: icezero.v
-	yosys -p 'synth_ice40 -top top -blif icezero.blif' icezero.v
+%.asc: $(PIN_DEF) %.blif
+	arachne-pnr -d $(subst hx,,$(subst lp,,$(DEVICE))) -o $@ -p $^ -P $(PACKAGE)
 
-icezero.asc: icezero.blif icezero.pcf
-	arachne-pnr -d 8k -P tq144:4k -p icezero.pcf -o icezero.asc icezero.blif
+%.bin: %.asc
+	icepack $< $@
 
-icezero.bin: icezero.asc
-	icetime -d hx8k -c 100 icezero.asc
-	icepack icezero.asc icezero.bin
+%.rpt: %.asc
+	icetime -d $(DEVICE) -mtr $@ $<
 
-testbench: testbench.v icezero.v
-	iverilog -o testbench testbench.v icezero.v  $(shell yosys-config --datdir/ice40/cells_sim.v)
-
-testbench.vcd: testbench
-	./testbench
+%.prog: %.bin
+	icezprog  $<
 
 clean:
-	rm -f testbench testbench.vcd
-	rm -f icezero.blif icezero.asc icezero.bin
+	rm -f *.blif *.asc *.rpt *.bin
 
-.PHONY: all prog reset clean
-
+.PHONY: all %.prog clean
