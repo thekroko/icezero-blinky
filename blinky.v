@@ -1,3 +1,4 @@
+`include "prescaler.v"
 
 module top (
 	input clk_100mhz,
@@ -30,9 +31,7 @@ module top (
 `endif
 
 	// Blink LED with ~2 Hz
-	reg[21:0] ledCounter = 0;
-	always @(posedge clk_16mhz) begin
-		ledCounter <= ledCounter + 1;
-	end
-	assign led1 = ledCounter[21];
+	wire clk_2hz;
+	prescaler #(.bits(23)) ps1(.clk_in(clk_16mhz), .clk_out(clk_2hz));
+	assign led1 = clk_2hz;
 endmodule
